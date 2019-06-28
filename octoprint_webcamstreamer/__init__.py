@@ -25,7 +25,7 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
         self.client = None
         self.image = None
         self.container = None
-    
+
         self.frame_rate_default = 5
         self.ffmpeg_cmd_default = (
             "ffmpeg -re -f mjpeg -framerate 5 -i {webcam_url} "                                                                   # Video input
@@ -37,7 +37,7 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
         self.docker_container_default = "WebStreamer"
 
     ##~~ StartupPlugin
-    
+
     def on_after_startup(self):
         self._logger.info(
             "OctoPrint-WebcamStreamer loaded! \n"
@@ -52,7 +52,7 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
         self._check_stream()
 
     ##~~ TemplatePlugin
-    
+
     def get_template_configs(self):
         return [dict(type="settings",custom_bindings=False)]
 
@@ -101,15 +101,15 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
         )
 
     ##~~ SimpleApiPlugin
-    
+
     def get_api_commands(self):
         return dict(startStream=[],stopStream=[],checkStream=[])
-        
+
     def on_api_command(self, command, data):
         if not user_permission.can():
             from flask import make_response
             return make_response("Insufficient rights", 403)
-        
+
         if command == 'startStream':
             self._logger.info("Start stream command received.")
             self._start_stream()
@@ -123,11 +123,11 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
             self._check_stream()
 
     ##-- EventHandlerPlugin
-    
+
     def on_event(self, event, payload):
         if event == "PrintStarted" and self._settings.get(["auto_start"]):
             self._start_stream()
-            
+
         if event in ["PrintDone","PrintCancelled"] and self._settings.get(["auto_start"]):
             self._stop_stream()
 
@@ -159,7 +159,7 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
             except Exception, e:
                 self.client = None
                 self.container = None
-    
+
     def _start_stream(self):
         self._get_container()
         if not self.container:
@@ -199,7 +199,7 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
                 self._logger.info("Stream started successfully")
                 self._plugin_manager.send_plugin_message(self._identifier, dict(success="Stream started",status=True,streaming=True))
         return
-        
+
     def _stop_stream(self):
         self._get_container()
         if self.container:
@@ -237,12 +237,12 @@ class WebcamStreamerPlugin(octoprint.plugin.StartupPlugin,
 
                 # version check: github repository
                 type="github_release",
-                user="adilinden-oss",
+                user="d6e",
                 repo="octoprint-webcamstreamer",
                 current=self._plugin_version,
 
                 # update method: pip
-                pip="https://github.com/adilinden-oss/octoprint-webcamstreamer/archive/{target_version}.zip"
+                pip="https://github.com/d6e/octoprint-webcamstreamer/archive/{target_version}.zip"
             )
         )
 
@@ -260,4 +260,3 @@ def __plugin_load__():
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
     }
-
